@@ -23,6 +23,7 @@ namespace HomewardBound
 
             if (mdctPending.TryGetValue(steamId, out Coroutine existing))
             {
+                Helper.SendPrivateMessage(player, "Home teleport in progress. Move to cancel.", InfoColor);
                 return;
             }
 
@@ -45,11 +46,8 @@ namespace HomewardBound
 
             yield return new WaitForSeconds(DelaySeconds);
 
-            bool cancelled = false;
-            string cancelReason = string.Empty;
             if (player == null || player.player == null)
             {
-                cancelled = true;
                 mdctPending.Remove(steamId);
                 yield break;
             }
@@ -57,25 +55,23 @@ namespace HomewardBound
             Vector3 currentPosition = player.player.transform.position;
             if (Vector3.Distance(currentPosition, startPosition) > TeleportCancelDistance)
             {
-                cancelled = true;
-                cancelReason = "Home teleport cancelled - you moved.";
+                Helper.SendPrivateMessage(player, "Home teleport cancelled - you moved.", ErrorColor);
                 mdctPending.Remove(steamId);
                 yield break;
             }
 
-            if (cancelled)
-            {
-                if (cancelReason != null && player != null && player.player != null)
-                {
-                    Helper.SendPrivateMessage(player, cancelReason, ErrorColor);
-                }
-                yield break;
-            }
 
-            player.player.teleportToBed();
-            Helper.SendPrivateMessage(player, "Teleport Complete.", SuccessColor);
-
+            bool completed = player.player.teleportToBed();
             mdctPending.Remove(steamId);
+
+            if (completed)
+            {
+                Helper.SendPrivateMessage(player, "Teleport Complete.", SuccessColor);
+            } 
+            else
+            {
+                Helper.SendPrivateMessage(player, "Teleport Failed.", ErrorColor);
+            }
         }
     }
 }

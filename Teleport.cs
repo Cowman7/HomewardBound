@@ -44,22 +44,27 @@ namespace HomewardBound
 
             Helper.SendPrivateMessage(player, $"Teleporting home in {DelaySeconds:0} seconds. Don't move.", InfoColor);
 
-            yield return new WaitForSeconds(DelaySeconds);
 
-            if (player == null || player.player == null)
+            double elapsedTime = 0.0f;
+            do
             {
-                mdctPending.Remove(steamId);
-                yield break;
-            }
+                yield return new WaitForEndOfFrame();
+                elapsedTime += Time.deltaTime;
 
-            Vector3 currentPosition = player.player.transform.position;
-            if (Vector3.Distance(currentPosition, startPosition) > TeleportCancelDistance)
-            {
-                Helper.SendPrivateMessage(player, "Home teleport cancelled - you moved.", ErrorColor);
-                mdctPending.Remove(steamId);
-                yield break;
-            }
+                if (player == null || player.player == null)
+                {
+                    mdctPending.Remove(steamId);
+                    yield break;
+                }
 
+                Vector3 currentPosition = player.player.transform.position;
+                if (Vector3.Distance(currentPosition, startPosition) > TeleportCancelDistance)
+                {
+                    Helper.SendPrivateMessage(player, "Home teleport cancelled - you moved.", ErrorColor);
+                    mdctPending.Remove(steamId);
+                    yield break;
+                }
+            } while (elapsedTime < DelaySeconds);
 
             bool completed = player.player.teleportToBed();
             mdctPending.Remove(steamId);

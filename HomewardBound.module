@@ -1,0 +1,11 @@
+﻿{
+	"IsEnabled": true,
+	"Name": HomewardBound",
+	"Version", "1.0.0",
+	"Assemblies": [
+		{
+			"Path": "/HomewardBound.dll",
+			"Role": "Server"
+		}
+	]
+}
